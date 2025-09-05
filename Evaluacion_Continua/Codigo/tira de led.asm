@@ -22,11 +22,11 @@ out PORTC, r23
 ;___________________________________________________________________________________________
 
 main_loop:
-    sbic PINC, PC0     ; 2 delay si lo prendes; sin presiona y salta
+    sbis PINC, PC0     ; 2 delay si lo prendes; sin presiona y salta
     rjmp main1_1
-    sbic PINC, PC1     ; 0 delay si lo prendes ;(sbic) con presiona y salta
+    sbis PINC, PC1     ; 0 delay si lo prendes ;(sbic) con presiona y salta
     rjmp main1_2
-    sbic PINC, PC2     ; 2 delay si lo prendes; sin presiona y salta
+    sbis PINC, PC2     ; 2 delay si lo prendes; sin presiona y salta
     rjmp main1_3
 
     rjmp main_loop
@@ -55,6 +55,13 @@ delay_1:
     cpi r17, 0x00 ; comparamos si llegamos al final del puerto
     brne main1_1; repetimos si no hemos llegado
 
+	sbis PINC, PC0     ; 2 delay si lo prendes; sin presiona y salta
+    rjmp main1_1
+    sbis PINC, PC1     ; 0 delay si lo prendes ;(sbic) con presiona y salta
+    rjmp main1_2
+    sbis PINC, PC2     ; 2 delay si lo prendes; sin presiona y salta
+    rjmp main1_3
+
     rjmp main1_1 ; volver al bucle principal
 
 ;___________________________________________________________________________________________
@@ -81,7 +88,13 @@ delay_2:
     ldi r16, 0x00 ; cargamos el valor 0
     out PORTD, r16 ; apagamos todos los pines
 
-    ldi r17, 0x01 ; reiniciamos a la primera posicion
+	sbis PINC, PC0     ; 2 delay si lo prendes; sin presiona y salta
+    rjmp main1_1
+    sbis PINC, PC1     ; 0 delay si lo prendes ;(sbic) con presiona y salta
+    rjmp main1_2
+    sbis PINC, PC2     ; 2 delay si lo prendes; sin presiona y salta
+    rjmp main1_3
+
     rjmp main1_2 ; volver al bucle principal
 
 ;___________________________________________________________________________________________
@@ -142,6 +155,13 @@ main1_3:
     ldi r16, 0xFF   ; Apagamos todos los LEDs (poner todos los pines en 1)
     out PORTD, r16
     rcall delay_3
+
+	sbis PINC, PC0     ; 2 delay si lo prendes; sin presiona y salta
+    rjmp main1_1
+    sbis PINC, PC1     ; 0 delay si lo prendes ;(sbic) con presiona y salta
+    rjmp main1_2
+    sbis PINC, PC2     ; 2 delay si lo prendes; sin presiona y salta
+    rjmp main1_3
 
     rjmp main1_3  ; Volvemos al bucle principal
 
