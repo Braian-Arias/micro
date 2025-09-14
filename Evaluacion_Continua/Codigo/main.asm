@@ -2,21 +2,16 @@
 .org 0x0000
     rjmp INICIO
 
-;===============================
-; Inicialización
-;===============================
 INICIO:
-    ; Configurar columnas (D2–D7 y B0–B1) como salida
+    ; Configurar columnas (D2â€“D7 y B0â€“B1) como salida
     ldi r16, 0b11111100   ; D2..D7 salida
     out DDRD, r16
-    ldi r16, 0b00000011   ; B0 y B1 salida
-    out DDRB, r16
 
-    ; Configurar filas (B2–B5 y C0–C3) como salida
-    ldi r16, 0b00111100   ; B2..B5 salida
-    out DDRB, r16
-    ldi r16, 0b00001111   ; C0..C3 salida
-    out DDRC, r16
+    ; Configurar filas (B2â€“B5 y C0â€“C3) como salida
+    ldi r18, 0b00111111   ; B2..B5 salida + B1 y B2 columna
+    out DDRB, r18
+    ldi r19, 0b00001111   ; C0..C3 salida
+    out DDRC, r19
 	
     ldi r16, HIGH(0x03FF)
     out SPH, r16
@@ -24,71 +19,368 @@ INICIO:
     out SPL, r16
 
     rjmp LOOP
-
-;===============================
 ; Rutina principal
-;===============================
 LOOP:
-; Apagar todas las columnas
-ldi r16, 0b11111100        ; columnas D2–D7 en 1
-out PORTD, r16
-in  r17, PORTB             ; leer estado actual
-ori r17, 0b00000011        ; poner B0–B1 en 1 sin tocar filas
-out PORTB, r17
-
-; Apagar todas las filas
-in  r17, PORTB             ; leer PORTB de nuevo
-andi r17, 0b11000011       ; limpiar bits B2..B5 (dejarlos en 0)
-out PORTB, r17
-ldi r16, 0b00001111        ; PORTC filas en 0
-out PORTC, r16
-
-
-111111111111
-; Columna 0 en bajo
-in  r17, PORTD
-andi r17, 0b00000000       ; poner D2 = 0
-out PORTD, r17
-
-; Fila 0 en alto
-in  r17, PORTB
-ori r17, 0b11111011          ; activar fila B2 10
-out PORTB, r17
+call cara_feliz
+call cara_feliz
+call cara_feliz
+rcall delay
+call cara_feliz
+call cara_feliz
+rcall delay
+call cara_feliz
+call cara_feliz
+call cara_feliz
+call cara_feliz
+call cara_feliz
+call cara_feliz
+rcall delay
+call cara_feliz
+call cara_feliz
+rcall delay
+call cara_feliz
+call cara_feliz
+call cara_feliz
+call Apagar
 rcall delayy
 
-2222222222222
-; Columna 0 en bajo
-in  r17, PORTD
-andi r17, 0b1000100       ; poner D2 = 0
-out PORTD, r17
-
-
-; Fila 0 en alto
-in  r17, PORTB
-ori r17, 0b11110111          ; activar fila B2 10
-out PORTB, r17
+call cara_triste
+call cara_triste
+rcall delay
+call cara_triste
+call cara_triste
+rcall delay
+call cara_triste
+call cara_triste
+call cara_triste
+call cara_triste
+call cara_triste
+call cara_triste
+rcall delay
+call cara_triste
+call cara_triste
+rcall delay
+call cara_triste
+call cara_triste
+call cara_triste
+call cara_triste
+call Apagar
 rcall delayy
-rjmp loop
+
+call rombo
+call rombo
+call rombo
+call rombo
+call rombo
+call rombo
+call rombo
+call rombo
+call rombo
+call rombo
+call rombo
+call rombo
+call rombo
+call rombo
+call rombo
+call rombo
+call Apagar
+rcall delayy
+
+call corazon
+call corazon
+call corazon
+call corazon
+call corazon
+call corazon
+call corazon
+call corazon
+call corazon
+call corazon
+call corazon
+call corazon
+call corazon
+call corazon
+call corazon
+call corazon
+call corazon
+call corazon
+call Apagar
+rcall delayy
+
+call invacion_espacial
+call invacion_espacial
+call invacion_espacial
+call invacion_espacial
+call invacion_espacial
+call invacion_espacial
+call invacion_espacial
+call invacion_espacial
+call invacion_espacial
+call invacion_espacial
+call invacion_espacial
+call invacion_espacial
+call invacion_espacial
+call invacion_espacial
+call invacion_espacial
+call invacion_espacial
+call invacion_espacial
+call invacion_espacial
+call Apagar
+rcall delayy
+
+ret
+
+Apagar:
+; Apagar todas las columnas___________________________________________
+ldi r16, 0b11111100        ; columnas D2â€“D7 en 1
+out PORTD, r16         ; leer estado actual
+; Apagar todas las filas______________________________________________
+ldi r18, 0b00111111       ; limpiar bits B2..B5 (dejarlos en 0)
+out PORTB, r18
+ldi r19, 0b00001111        ; PORTC filas en 0
+out PORTC, r19
+ret
+
+cara_feliz:
+;___________________________________________________________
+; Columna _____________________________________
+ldi r16, 0b00100100 
+out PORTD, r16         
+; Fila ultimos de columna
+ldi r18, 0b00100100          
+out PORTB, r18
+; Fila 
+ldi r19, 0b00001011          
+out PORTC, r19
+call delay
+; ________________________________________________________________________
+; Columna _____________________________________
+ldi r16, 0b00011000 
+out PORTD, r16         
+; Fila ultimos de columna
+ldi r18, 0b00111100          
+out PORTB, r18
+; Fila 
+ldi r19, 0b00001101          
+out PORTC, r19
+call delay
+; ________________________________________________________________________
+; Columna _____________________________________
+ldi r16, 0b01000000 
+out PORTD, r16         
+; Fila ultimos de columna
+ldi r18, 0b00111110          
+out PORTB, r18
+; Fila 
+ldi r19, 0b00000111          
+out PORTC, r19
+call delay
+; ________________________________________________________________________
+ret
+
+
+
+cara_triste:
+;___________________________________________________________
+; Columna _____________________________________
+ldi r16, 0b00100100 
+out PORTD, r16         
+; Fila ultimos de columna
+ldi r18, 0b00100100          
+out PORTB, r18
+; Fila 
+ldi r19, 0b00001011          
+out PORTC, r19
+call delay
+; ________________________________________________________________________
+; Columna _____________________________________
+ldi r16, 0b00011000 
+out PORTD, r16         
+; Fila ultimos de columna
+ldi r18, 0b00111100          
+out PORTB, r18
+; Fila 
+ldi r19, 0b00000111          
+out PORTC, r19
+call delay
+; ________________________________________________________________________
+; Columna _____________________________________
+ldi r16, 0b01000000 
+out PORTD, r16         
+; Fila ultimos de columna
+ldi r18, 0b00111110          
+out PORTB, r18
+; Fila 
+ldi r19, 0b00001101          
+out PORTC, r19
+call delay
+; ________________________________________________________________________
+ret
+
+rombo:
+;___________________________________________________________
+; Columna _____________________________________
+ldi r16, 0b00100100 
+out PORTD, r16         
+; Fila ultimos de columna
+ldi r18, 0b00100000          
+out PORTB, r18
+; Fila 
+ldi r19, 0b00000001         
+out PORTC, r19
+call delay
+; ________________________________________________________________________
+; Columna _____________________________________
+ldi r16, 0b00011000 
+out PORTD, r16         
+; Fila ultimos de columna
+ldi r18, 0b00000000          
+out PORTB, r18
+; Fila 
+ldi r19, 0b00000000          
+out PORTC, r19
+call delay
+; ________________________________________________________________________
+; Columna _____________________________________
+ldi r16, 0b01000000 
+out PORTD, r16         
+; Fila ultimos de columna
+ldi r18, 0b00110010          
+out PORTB, r18
+; Fila 
+ldi r19, 0b00000011          
+out PORTC, r19
+call delay
+; ________________________________________________________________________
+; Columna _____________________________________
+ldi r16, 0b10000000 
+out PORTD, r16         
+; Fila ultimos de columna
+ldi r18, 0b00111001          
+out PORTB, r18
+; Fila 
+ldi r19, 0b00000111          
+out PORTC, r19
+call delay
+; ________________________________________________________________________
+ret
+
+
+corazon:
+;___________________________________________________________
+; Columna _____________________________________
+ldi r16, 0b00100100 
+out PORTD, r16         
+; Fila ultimos de columna
+ldi r18, 0b00100000          
+out PORTB, r18
+; Fila 
+ldi r19, 0b00000001         
+out PORTC, r19
+call delay
+; ________________________________________________________________________
+; Columna _____________________________________
+ldi r16, 0b00011000 
+out PORTD, r16         
+; Fila ultimos de columna
+ldi r18, 0b00110000          
+out PORTB, r18
+; Fila 
+ldi r19, 0b00000000          
+out PORTC, r19
+call delay
+; ________________________________________________________________________
+; Columna _____________________________________
+ldi r16, 0b01000000 
+out PORTD, r16         
+; Fila ultimos de columna
+ldi r18, 0b00100010          
+out PORTB, r18
+; Fila 
+ldi r19, 0b00000011          
+out PORTC, r19
+call delay
+; ________________________________________________________________________
+; Columna _____________________________________
+ldi r16, 0b10000000 
+out PORTD, r16         
+; Fila ultimos de columna
+ldi r18, 0b00110001          
+out PORTB, r18
+; Fila 
+ldi r19, 0b00000111          
+out PORTC, r19
+call delay
+; ________________________________________________________________________
+
+ret
+
+invacion_espacial:
+;___________________________________________________________
+; Columna _____________________________________
+ldi r16, 0b00100100 
+out PORTD, r16         
+; Fila ultimos de columna
+ldi r18, 0b00100100          
+out PORTB, r18
+; Fila 
+ldi r19, 0b00000010         
+out PORTC, r19
+call delay
+; ________________________________________________________________________
+; Columna _____________________________________
+ldi r16, 0b00011000 
+out PORTD, r16         
+; Fila ultimos de columna
+ldi r18, 0b00000000          
+out PORTB, r18
+; Fila 
+ldi r19, 0b00000011          
+out PORTC, r19
+call delay
+; ________________________________________________________________________
+; Columna _____________________________________
+ldi r16, 0b01000000 
+out PORTD, r16         
+; Fila ultimos de columna
+ldi r18, 0b00100010          
+out PORTB, r18
+; Fila 
+ldi r19, 0b00000100          
+out PORTC, r19
+call delay
+; ________________________________________________________________________
+; Columna _____________________________________
+ldi r16, 0b10000000 
+out PORTD, r16         
+; Fila ultimos de columna
+ldi r18, 0b00011001          
+out PORTB, r18
+; Fila 
+ldi r19, 0b00000111          
+out PORTC, r19
+call delay
+; ________________________________________________________________________
+ret
+
 ;___________________________________________________________________________
-Delay:
-    ldi  r19, 34
-    ldi  r20, 200
+delay:
+    ldi  r20, 110
     ldi  r21, 199
 L1: dec  r21
     brne L1
     dec  r20
     brne L1
-    dec  r19
-    brne L1
     ret 
-Delayy:
-    ldi  r19, 4
+;___________________________________________________________________________
+delayy:
+    ldi  r19, 34
     ldi  r20, 200
     ldi  r21, 199
 L2: dec  r21
     brne L2
     dec  r20
     brne L2
-    dec  r19
+	dec  r19
     brne L2
     ret 
