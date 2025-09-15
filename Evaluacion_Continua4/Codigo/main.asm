@@ -1,65 +1,238 @@
-.include "m328pdef.inc"
+;.include "m328pdef.inc"
 .org 0x0000
-    rjmp INICIO
+ rjmp INICIO
 
 INICIO:
-    ; Configurar columnas (D2–D7 y B0–B1) como salida
+    ; Configurar columnas (D2â€“D7 y B0â€“B1) como salida
     ldi r16, 0b11111100   ; D2..D7 salida
     out DDRD, r16
 
-    ; Configurar filas (B2–B5 y C0–C3) como salida
+    ; Configurar filas (B2â€“B5 y C0â€“C3) como salida
     ldi r18, 0b00111111   ; B2..B5 salida + B1 y B2 columna
     out DDRB, r18
     ldi r19, 0b00001111   ; C0..C3 salida
     out DDRC, r19
-	
+	ldi r19, (1<<PORTC4)|(1<<PORTC5)
+    out PORTC, r19
+
     ldi r16, HIGH(0x03FF)
     out SPH, r16
     ldi r16, LOW(0x03FF)
     out SPL, r16
-;boton
-
-    ldi r22, 0x00             ; Puerto C como entrada
-    out DDRC, r22
-    ldi r22, (1<<PORTC4)|(1<<PORTC5) ;A0 y A1
-    out PORTC, r22
-
-	ldi r20, 0b11111111
-	out DDRD, r20
 
     rjmp adelante
 
 adelante:
-Letra_C
-Letra_O
-Letra_C
-Letra_O
-Letra_S
-Letra_espacio
-Letra_L
-Letra_O
-Letra_C
-Letra_O
-Letra_S
-Letra_esclamacion
+Letra_C1:
+call Letra_C 
+sbis PINC, PC4
+call mas
+sbis PINC, PC5
+call menos
+call Letra_C1
 
-atras:
-Letra_esclamacion
-Letra_S
-Letra_O
-Letra_C
-Letra_O
-Letra_L
-Letra_espacio
-Letra_S
-Letra_O
-Letra_C
-Letra_O
-Letra_C
+mas:
+call Letra_espacio
+call delayy
+call Letra_O1
+menos:
+call Letra_espacio
+call delayy
+call Letra_esclamacion1
+;________________________________________________________
+Letra_O1:
+call Letra_O
+sbis PINC, PC4
+call mas1
+sbis PINC, PC5
+call menos1
+call Letra_O1
 
+mas1:
+call Letra_espacio
+call delayy
+call Letra_C2
+menos1:
+call Letra_espacio
+call delayy
+call Letra_C1
+;________________________________________________________
+Letra_C2:
+call Letra_C
+sbis PINC, PC4
+call mas2
+sbis PINC, PC5
+call menos2
+call Letra_C2
+
+mas2:
+call Letra_espacio
+call delayy
+call Letra_O2
+menos2:
+call Letra_espacio
+call delayy
+call Letra_O1
+;________________________________________________________
+Letra_O2:
+call Letra_O
+sbis PINC, PC4
+call mas3
+sbis PINC, PC5
+call menos3
+call Letra_O2
+
+mas3:
+call Letra_espacio
+call delayy
+call Letra_S1
+menos3:
+call Letra_espacio
+call delayy
+call Letra_C2
+;________________________________________________________
+Letra_S1:
+call Letra_S
+sbis PINC, PC4
+call mas4
+sbis PINC, PC5
+call menos4
+call Letra_S1
+
+mas4:
+call Letra_espacio
+call delayy
+call Letra_espacio1
+menos4:
+call Letra_espacio
+call delayy
+call Letra_O2
+;________________________________________________________
+Letra_espacio1:
+call Letra_espacio
+sbis PINC, PC4
+call mas5
+sbis PINC, PC5
+call menos5
+call Letra_espacio1
+
+mas5:
+call Letra_espacio
+call delayy
+call Letra_L1
+menos5:
+call Letra_espacio
+call delayy
+call Letra_S1
+;________________________________________________________
+Letra_L1:
+call Letra_L
+sbis PINC, PC4
+call mas6
+sbis PINC, PC5
+call menos6
+call Letra_L1
+
+mas6:
+call Letra_espacio
+call delayy
+call Letra_O3
+menos6:
+call Letra_espacio
+call delayy
+call Letra_espacio1
+;________________________________________________________
+Letra_O3:
+call Letra_O
+sbis PINC, PC4
+call mas7
+sbis PINC, PC5
+call menos7
+call Letra_O3
+
+mas7:
+call Letra_espacio
+call delayy
+call Letra_C3
+menos7:
+call Letra_espacio
+call delayy
+call Letra_L1
+;________________________________________________________
+Letra_C3:
+call Letra_C
+sbis PINC, PC4
+call mas8
+sbis PINC, PC5
+call menos8
+call Letra_C3
+
+mas8:
+call Letra_espacio
+call delayy
+call Letra_O4
+menos8:
+call Letra_espacio
+call delayy
+call Letra_O3
+;________________________________________________________
+Letra_O4:
+call Letra_O
+sbis PINC, PC4
+call mas9
+sbis PINC, PC5
+call menos9
+call Letra_O4
+
+mas9:
+call Letra_espacio
+call delayy
+call Letra_S2
+menos9:
+call Letra_espacio
+call delayy
+call Letra_C3
+;________________________________________________________
+Letra_S2:
+call Letra_S
+sbis PINC, PC4
+call mas10
+sbis PINC, PC5
+call menos10
+call Letra_S2
+
+mas10:
+call Letra_espacio
+call delayy
+call Letra_esclamacion1
+menos10:
+call Letra_espacio
+call delayy
+call Letra_O4
+;________________________________________________________
+Letra_esclamacion1:
+call Letra_esclamacion
+sbis PINC, PC4
+call mas11
+sbis PINC, PC5
+call menos11
+call Letra_esclamacion1
+
+mas11:
+call Letra_espacio
+call delayy
+call Letra_C1
+menos11:
+call Letra_espacio
+call delayy
+call Letra_S2
+;________________________________________________________
+
+;_______________________________________________________________________________________________
 Letra_espacio:
 ; Letra_espacio todas las columnas___________________________________________
-ldi r16, 0b11111100        ; columnas D2–D7 en 1
+call delay
+ldi r16, 0b11111100        ; columnas D2â€“D7 en 1
 out PORTD, r16         ; leer estado actual
 ; Letra_espacio todas las filas______________________________________________
 ldi r18, 0b00111111       ; limpiar bits B2..B5 (dejarlos en 0)
@@ -125,16 +298,12 @@ ldi r19, 0b00001001
 out PORTC, r19
 call delay
 ;__________________________________________________________
-sbic PINC, PC4
-call Letra_O
-sbic PINC, PC5
-call Letra_esclamacion
-call Letra_C
-
+ret
 
 Letra_O:
 ;___________________________________________________________
 ; Columna _____________________________________
+call delay
 ldi r16, 0b00011000 
 out PORTD, r16         
 ; Fila ultimos de columna
@@ -172,10 +341,11 @@ ret
 Letra_S:
 ;___________________________________________________________
 ; Columna _____________________________________
+call delay
 ldi r16, 0b00011000 
 out PORTD, r16         
 ; Fila ultimos de columna
-ldi r18, 0b00000100          
+ldi r18, 0b00001000          
 out PORTB, r18
 ; Fila 
 ldi r19, 0b00000100          
@@ -221,6 +391,7 @@ ret
 Letra_L:
 ;___________________________________________________________
 ; Columna _____________________________________
+call delay
 ldi r16, 0b01100000 
 out PORTD, r16         
 ; Fila ultimos de columna
