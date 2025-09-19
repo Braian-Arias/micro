@@ -1,26 +1,19 @@
-;
 ; AssemblerApplication14.asm
-;
 ; Created: 19/9/2025 15:28:23
 ; Author : User
-;
-
-
-; Replace with your application code
 .include "m328pdef.inc"
-
 .org 0x0000
     rjmp Inicio
 .org OC1Aaddr
-    rjmp TIMER1_ISR      ; vector de interrupción Timer1 Compare A
+    rjmp TIMER1_ISR      ; vector de interrupciÃ³n Timer1 Compare A
 
 ; Variables en SRAM
 .dseg
-Lutt: .byte 1        ; índice actual en la LUT
+Lutt: .byte 1        ; Ã­ndice actual en la LUT
 
 .cseg
 Inicio:
-    ; Inicialización Stack
+    ; InicializaciÃ³n Stack pointer(paque ande los led
     ldi r16, high(RAMEND)
     out SPH, r16
     ldi r16, low(RAMEND)
@@ -41,8 +34,8 @@ Inicio:
 	; Configurar Timer1 en modo CTC con OCR1A
     ldi r16, (1<<WGM12)       ; Modo CTC
     sts TCCR1B, r16
-    ; Habilitar interrupción por OCR1A
-    ldi r16, (1<<OCIE1A)      ; habilitar interrupción OCR1A
+    ; Habilitar interrupciÃ³n por OCR1A
+    ldi r16, (1<<OCIE1A)      ; habilitar interrupciÃ³n OCR1A
     sts TIMSK1, r16
 
     ; prescaler = 8
@@ -51,21 +44,21 @@ Inicio:
 
     sei                        ; habilitar interrupciones globales
 
-; Interrupción Timer1 Compare A________________________________________
+; InterrupciÃ³n Timer1 Compare A________________________________________
 TIMER1_ISR:
-    ; cargar índice actual
-	lds r30, Lutt       ; índice
+    ; cargar Ã­ndice actual
+	lds r30, Lutt       ; Ã­ndice el bit guardado 
     ldi r31, high(lut<<1)
     ldi r17, low(lut<<1)
     add r30, r17
     adc r31, __zero_reg__
-    lpm r16, Z         ; ahora sí lee de la tabla
+    lpm r16, Z         ; ahora sÃ­ lee de la tabla con Z+ saltaba uno
 	out PORTD, r16             ; enviar a DAC (PORTD)
 
-    ; incrementar índice
+    ; incrementar Ã­ndice
     lds r30, Lutt
     inc r30
-    cpi r30, LUT_SIZE          ; si llegamos al final
+    cpi r30, LUT_SIZE          ; sÃ­ llegamos al final
     brlo No_Inicio
     ldi r30, 0                 ; volver a inicio
 No_Inicio:
