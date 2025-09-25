@@ -3,39 +3,157 @@
 ;
 ; Created: 15/9/2025 20:12:35
 ; Author : User
-;
-
-
-; Replace with your application code
+;13-Plotter-D Dibujar-E
 .include "m328pdef.inc"
 
 .org 0x0000
-    rjmp Inicio
-;___________________________________________________________________________
+RJMP Inicio
+
+;_________________________________________
 Inicio:
+    ; Inicializar stack
+    ldi r16,HIGH(RAMEND)
+    out SPH,r16
+    ldi r16,LOW(RAMEND)
+    out SPL,r16
+
+    ; Inicializar UART
+    rcall uart_init
+
+    ; Mostrar mensaje de bienvenida y menú
+    ldi ZL, LOW(mensaje_inicio<<1)
+    ldi ZH, HIGH(mensaje_inicio<<1)
+    rcall uart_print
+    rcall mostrar_menu
+
     ; Configurar salidas
     ldi r16, 0b11111100   ; PD7..PD2 como salida
     out DDRD, r16
 
+main_loop:
+    rcall uart_rx   ; Esperar comando desde UART
+
+    ; Comandos del menú
+    cpi r16,'1'
+    breq dibujar_triangulo
+    cpi r16,'2'
+    breq dibujar_circulo
+    cpi r16,'3'
+    breq dibujar_cruz
+    cpi r16,'T'
+    breq dibujar_todo
+
+    rjmp main_loop
+
+;_________________________________________
+dibujar_triangulo:
+    rcall triangulo
+    rcall mostrar_menu
+    rjmp main_loop
+
+dibujar_circulo:
+    rcall circulo
+    rcall mostrar_menu
+    rjmp main_loop
+
+dibujar_cruz:
+    rcall cruz
+    rcall mostrar_menu
+    rjmp main_loop
+
+dibujar_todo:
+    rcall triangulo
+    rcall circulo
+    rcall cruz
+    rcall mostrar_menu
+    rjmp main_loop
+
+;_________________________________________
+; Menú UART
+mostrar_menu:
+    ldi ZL, LOW(menu_msg<<1)
+    ldi ZH, HIGH(menu_msg<<1)
+    rcall uart_print
+    ldi ZL, LOW(menu_msg1<<1)
+    ldi ZH, HIGH(menu_msg1<<1)
+    rcall uart_print
+    ldi ZL, LOW(menu_msg2<<1)
+    ldi ZH, HIGH(menu_msg2<<1)
+    rcall uart_print
+    ldi ZL, LOW(menu_msg3<<1)
+    ldi ZH, HIGH(menu_msg3<<1)
+    rcall uart_print
+    ldi ZL, LOW(menu_msg4<<1)
+    ldi ZH, HIGH(menu_msg4<<1)
+    rcall uart_print
+    ret
+
+;_________________________________________
+; UART (inicialización y envío/recepción)
+uart_init:
+    ldi r16,HIGH(103)
+    sts UBRR0H,r16
+    ldi r16,LOW(103)
+    sts UBRR0L,r16
+    ldi r16,(1<<UCSZ01)|(1<<UCSZ00)
+    sts UCSR0C,r16
+    ldi r16,(1<<RXEN0)|(1<<TXEN0)
+    sts UCSR0B,r16
+    ret
+
+uart_tx:
+uart_tx_wait:
+    lds r17,UCSR0A
+    sbrs r17,UDRE0
+    rjmp uart_tx_wait
+    sts UDR0,r16
+    ret
+
+uart_rx:
+uart_rx_wait:
+    lds r17,UCSR0A
+    sbrs r17,RXC0
+    rjmp uart_rx_wait
+    lds r16,UDR0
+    ret
+
+uart_print:
+    lpm r16,Z+
+    cpi r16,0
+    breq uart_print_end
+    rcall uart_tx
+    rjmp uart_print
+uart_print_end:
+    ret
+
+;_________________________________________
+; Mensajes UART
+mensaje_inicio: .db "Bienvenido al Plotter",0x0D,0x0A,0
+menu_msg: .db "Menu:",0x0D,0x0A,0
+menu_msg1: .db "1=Triangulo",0x0D,0x0A,0
+menu_msg2: .db "2=Circulo",0x0D,0x0A,0
+menu_msg3: .db "3=Cruz",0x0D,0x0A,0,0
+menu_msg4: .db "T=Todo",0x0D,0x0A,0,0
+
 
 ;___________________________________________________________________________
-main_loop:
-call Q
-call Centro
+;main_loop:;
+;call Q;
+;call Centro;
 ;CALL triangulo
 ;call delay
 ;call Q;Subir solenoide: ;  D3
-call delay
-call Izquierda
-CALL circulo
-call delay
+;call delay;
+;call Izquierda;
+;CALL circulo;
+;call delay;
 ;call Q;Subir solenoide: ;  D3
 ;call delay
 ;call Izquierda
 ;CALL cruz
 ;call delay
 
-rjmp main_loop
+;rjmp main_loop;
 
 ;PRUEBA:
 ;call Q
