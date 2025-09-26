@@ -5,7 +5,9 @@
 ; Author : User
 ;13-Plotter-D Dibujar-E
 .include "m328pdef.inc"
-
+.equ F_CPU = 16000000
+.equ baud = 9600
+.equ bps = (F_CPU/16/baud)-1  
 .org 0x0000
 RJMP Inicio
 
@@ -30,43 +32,93 @@ Inicio:
     ldi r16, 0b11111100   ; PD7..PD2 como salida
     out DDRD, r16
 
-main_loop:
+
+main: 
     rcall uart_rx   ; Esperar comando desde UART
-
-    ; Comandos del menú
+; Comandos del menú
     cpi r16,'1'
-    breq dibujar_triangulo
+    breq cmd1
     cpi r16,'2'
-    breq dibujar_circulo
-    cpi r16,'3'
-    breq dibujar_cruz
+    breq cmd2
+	cpi r16,'3'
+    breq cmd3
     cpi r16,'T'
-    breq dibujar_todo
+    breq cmd4
 
-    rjmp main_loop
+    rjmp main
 
 ;_________________________________________
+; Comandos
+cmd1:
+  ldi ZL, LOW(opcion1_msg<<1)
+  ldi ZH, HIGH(opcion1_msg<<1)
+  rcall uart_print
+  rcall dibujar_triangulo
+  rjmp main
+
+cmd2:
+  ldi ZL, LOW(opcion2_msg<<1)
+  ldi ZH, HIGH(opcion2_msg<<1)
+  rcall uart_print
+  rcall dibujar_circulo
+  rjmp main
+
+cmd3:
+  ldi ZL, LOW(opcion3_msg<<1)
+  ldi ZH, HIGH(opcion3_msg<<1)
+  rcall uart_print
+  rcall dibujar_cruz
+  rjmp main
+
+cmd4:
+  ldi ZL, LOW(opcion4_msg<<1)
+  ldi ZH, HIGH(opcion4_msg<<1)
+  rcall uart_print
+  rcall dibujar_todo
+  rjmp main
+
 dibujar_triangulo:
-    rcall triangulo
-    rcall mostrar_menu
-    rjmp main_loop
+    call Q;
+    call Centro;
+    CALL triangulo
+    call delay
+    call Q;Subir solenoide: ;  D3
+    call delay;
+    ret
 
 dibujar_circulo:
-    rcall circulo
-    rcall mostrar_menu
-    rjmp main_loop
+    call Q;Subir solenoide: ;  D3
+    call delay;
+    call Izquierda;
+    CALL circulo;
+    call delay;
+    ret
 
 dibujar_cruz:
-    rcall cruz
-    rcall mostrar_menu
-    rjmp main_loop
+    call Q;Subir solenoide: ;  D3
+    call delay
+    call Izquierda
+    CALL cruz
+	call Q;Subir 
+    call delay
+    ret
 
 dibujar_todo:
-    rcall triangulo
-    rcall circulo
-    rcall cruz
-    rcall mostrar_menu
-    rjmp main_loop
+    call Q;
+    call Centro;
+    CALL triangulo
+    call delay
+    call Q;Subir solenoide: ;  D3
+    call delay;
+    call Izquierda;
+    CALL circulo;
+    call delay;
+    call Q;Subir solenoide: ;  D3
+    call Izquierda
+    CALL cruz
+	call Q;Subir 
+    call delay
+    ret
 
 ;_________________________________________
 ; Menú UART
@@ -89,43 +141,49 @@ mostrar_menu:
     ret
 
 ;_________________________________________
-; UART (inicialización y envío/recepción)
+; Inicializar UART 9600 8N1
 uart_init:
-    ldi r16,HIGH(103)
-    sts UBRR0H,r16
-    ldi r16,LOW(103)
-    sts UBRR0L,r16
-    ldi r16,(1<<UCSZ01)|(1<<UCSZ00)
-    sts UCSR0C,r16
-    ldi r16,(1<<RXEN0)|(1<<TXEN0)
-    sts UCSR0B,r16
-    ret
+  ldi r16,HIGH(103)
+  sts UBRR0H,r16
+  ldi r16,LOW(103)
+  sts UBRR0L,r16
+  ldi r16,(1<<UCSZ01)|(1<<UCSZ00)
+  sts UCSR0C,r16
+  ldi r16,(1<<RXEN0)|(1<<TXEN0)
+  sts UCSR0B,r16
+  ret
 
+;_________________________________________________________________________________________________
+; Transmitir carácter por UART
 uart_tx:
-uart_tx_wait:
+  uart_tx_wait:
     lds r17,UCSR0A
     sbrs r17,UDRE0
     rjmp uart_tx_wait
-    sts UDR0,r16
-    ret
+  sts UDR0,r16
+  ret
 
+;_________________________________________________________________________________________________
+; Recibir carácter por UART
 uart_rx:
-uart_rx_wait:
+  uart_rx_wait:
     lds r17,UCSR0A
     sbrs r17,RXC0
     rjmp uart_rx_wait
-    lds r16,UDR0
-    ret
+  lds r16,UDR0
+  ret
 
+;_________________________________________________________________________________________________
+; Transmitir string desde memoria de programa (terminado en 0)
+; Z = puntero
 uart_print:
-    lpm r16,Z+
-    cpi r16,0
-    breq uart_print_end
-    rcall uart_tx
-    rjmp uart_print
+  lpm r16,Z+
+  cpi r16,0
+  breq uart_print_end
+  rcall uart_tx
+  rjmp uart_print
 uart_print_end:
-    ret
-
+  ret
 ;_________________________________________
 ; Mensajes UART
 mensaje_inicio: .db "Bienvenido al Plotter",0x0D,0x0A,0
@@ -134,39 +192,10 @@ menu_msg1: .db "1=Triangulo",0x0D,0x0A,0
 menu_msg2: .db "2=Circulo",0x0D,0x0A,0
 menu_msg3: .db "3=Cruz",0x0D,0x0A,0,0
 menu_msg4: .db "T=Todo",0x0D,0x0A,0,0
-
-
-;___________________________________________________________________________
-;main_loop:;
-;call Q;
-;call Centro;
-;CALL triangulo
-;call delay
-;call Q;Subir solenoide: ;  D3
-;call delay;
-;call Izquierda;
-;CALL circulo;
-;call delay;
-;call Q;Subir solenoide: ;  D3
-;call delay
-;call Izquierda
-;CALL cruz
-;call delay
-
-;rjmp main_loop;
-
-;PRUEBA:
-;call Q
-;call Centro
-;CALL S
-;CALL A
-;CALL W
-;CALL D
-;CALL SA
-;CALL SD
-;CALL WD
-;CALL WA
-;RJMP PRUEBA
+opcion1_msg: .db "Mostrando Triangulo",0x0D,0x0A,0
+opcion2_msg: .db "Mostrando Circulo ",0x0D,0x0A,0,0
+opcion3_msg: .db "Mostrando Cruz",0x0D,0x0A,0,0
+opcion4_msg: .db "Mostrando Todo",0x0D,0x0A,0,0
 ;___________________________________________________________________________
 ;Pin Digital
 ;Conexión                           Pin Digital                 
@@ -267,10 +296,8 @@ CALL Q
 triangulo:	
     call E
 	call SD
-
 	call A
 	call A
-
 	call WD
 	call Q
 	ret
@@ -318,8 +345,6 @@ call E
 	call S1
 	call S1
 	call A1
-	
-	
 	;________________1/4
 	call S1
 	call S1
@@ -403,8 +428,6 @@ call E
 	call W1
 	call W1
 	call D1
-
-
 	;________________3/4
 	call W1
 	call W1
@@ -482,7 +505,6 @@ A1:
     out PORTD, r16
 	call delayy
 	ret
-
 D1:
 ;Movimiento hacia ABAJO:          ;D5
     ldi r16, 0b01000100
@@ -502,17 +524,11 @@ S1:
 	call delayy
 	ret
 ;___________________________________________________________________________	
-
-
 	cruz:
-	
 	call E
 	call SA
-
 	call derecha
-
 	call WA
-
 	call E
 	ret
 ;___________________________________________________________________________	
@@ -523,7 +539,6 @@ CALL Q
 	call delay
 	CALL E
 	ret
-
 ;___________________________________________________________________________	
 Delay:
     ldi  r19, 134
